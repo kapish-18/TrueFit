@@ -1,5 +1,5 @@
 import { getDatabase } from '../db/database';
-import { generateId } from './calculations';
+import { formatDate } from './date';
 import { 
   getActiveProgram, 
   getProgramDays, 
@@ -46,7 +46,7 @@ export async function seedMockData() {
       // Skip if it's in the future
       if (workoutDate > now) continue;
 
-      const dateStr = workoutDate.toISOString().split('T')[0];
+      const dateStr = formatDate(workoutDate);
 
       const logId = await createWorkoutLog({
         program_id: program.id,

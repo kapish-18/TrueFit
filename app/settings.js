@@ -37,16 +37,28 @@ export default function SettingsScreen() {
 
   const handleSeedData = async () => {
     if (seeding) return; // Prevent double-tap
-    setSeeding(true);
-    try {
-      await seedMockData();
-      await loadPrograms();
-      clearSession();
-      showToast('8 weeks of data generated!', 'success');
-    } catch (e) {
-      showToast(e.message || 'Failed to generate data', 'error');
-    }
-    setSeeding(false);
+    Alert.alert(
+      'Generate Mock Data',
+      'This will add 8 weeks of simulated workout data to your current program. Existing data will NOT be removed. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Generate',
+          onPress: async () => {
+            setSeeding(true);
+            try {
+              await seedMockData();
+              await loadPrograms();
+              clearSession();
+              showToast('8 weeks of data generated!', 'success');
+            } catch (e) {
+              showToast(e.message || 'Failed to generate data', 'error');
+            }
+            setSeeding(false);
+          },
+        },
+      ]
+    );
   };
 
   const handleClearData = () => {

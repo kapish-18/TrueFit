@@ -133,8 +133,9 @@ async function runMigrations(database) {
  * Close the database connection
  */
 export async function closeDatabase() {
-  if (db) {
+  if (dbPromise) {
+    const db = await dbPromise;
     await db.closeAsync();
-    db = null;
+    dbPromise = null;
   }
 }

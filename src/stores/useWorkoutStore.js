@@ -2,14 +2,13 @@
 // Manages current logging session state
 import { create } from 'zustand';
 import {
-  createWorkoutLog, addLogExercise, addLogSet, updateLogSet,
+  createWorkoutLog, addLogExercise, addLogSet, updateLogSet, deleteLogSet,
   updateLogExerciseNotes, updateWorkoutLog, getLogExercises,
   getWorkoutLogById, deleteWorkoutLog, getLastPerformance
 } from '../db/dao';
 import { detectPRs } from '../engine/prDetector';
 import { getOverloadRecommendation } from '../engine/progressiveOverload';
 import { getToday } from '../utils/date';
-import { generateId } from '../utils/calculations';
 
 export const useWorkoutStore = create((set, get) => ({
   currentLogId: null,
@@ -190,8 +189,13 @@ export const useWorkoutStore = create((set, get) => ({
     const exercise = state.exercises.find(e => e.id === logExerciseId);
     if (!exercise) return;
 
-    const newSetNumber = (exercise.sets?.length || 0) + 1;
-    const setId = await addLogSet(logExerciseId, newSetNumber, 0, 0);
+    const existingSets = exercise.sets || [];
+    const lastSet = existingSets[existingSets.length - 1];
+    const prefillWeight = lastSet?.weight || 0;
+    const prefillReps = lastSet?.reps || 0;
+
+    const newSetNumber = existingSets.length + 1;
+    const setId = await addLogSet(logExerciseId, newSetNumber, prefillWeight, prefillReps);
 
     set(state => ({
       exercises: state.exercises.map(ex => {
@@ -202,10 +206,27 @@ export const useWorkoutStore = create((set, get) => ({
             id: setId,
             log_exercise_id: logExerciseId,
             set_number: newSetNumber,
-            weight: 0,
-            reps: 0,
+            weight: prefillWeight,
+            reps: prefillReps,
             rpe: null,
           }],
+        };
+      }),
+    }));
+  },
+
+  /**
+   * Delete a set from an exercise
+   */
+  deleteSet: async (logExerciseId, setId) => {
+    await deleteLogSet(setId);
+
+    set(state => ({
+      exercises: state.exercises.map(ex => {
+        if (ex.id !== logExerciseId) return ex;
+        return {
+          ...ex,
+          sets: ex.sets.filter(s => s.id !== setId),
         };
       }),
     }));

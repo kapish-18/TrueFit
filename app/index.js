@@ -195,7 +195,7 @@ export default function DashboardScreen() {
         <StatCard
           title="Weekly Volume"
           value={`${Math.round(dashData.weeklyVolume.totalVolume / 1000)}k`}
-          subtitle="kg total"
+          subtitle={`${useSettingsStore.getState().weightUnit} total`}
           icon="barbell"
           iconColor={colors.primary}
         />

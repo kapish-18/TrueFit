@@ -1,6 +1,6 @@
 // Log Index — Select which workout to log or view log history
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, spacing, radius, fontSize, fontWeight, shadows } from '../../src/theme/theme';
@@ -18,6 +18,7 @@ export default function LogIndex() {
   const [recentLogs, setRecentLogs] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [deloadInfo, setDeloadInfo] = useState(null);
+  const [starting, setStarting] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,37 +53,38 @@ export default function LogIndex() {
     setRefreshing(false);
   };
 
+  const doStartWorkout = async (day, isDeload) => {
+    setStarting(true);
+    try {
+      const logId = await startWorkout(activeProgram.id, day.id, day.exercises, isDeload);
+      router.push(`/log/${logId}`);
+    } finally {
+      setStarting(false);
+    }
+  };
+
   const handleStartLog = async (day) => {
-    if (!activeProgram) return;
+    if (!activeProgram || starting) return;
     
     if (deloadInfo?.needed) {
-      import('react-native').then(({ Alert }) => {
-        Alert.alert(
-          'Deload Recommended',
-          'Do you want to apply deload reductions (lower weight and sets) to this workout to give your joints, ligaments, and bones time to catch up?',
-          [
-            {
-              text: 'Normal Workout',
-              style: 'cancel',
-              onPress: async () => {
-                const logId = await startWorkout(activeProgram.id, day.id, day.exercises, false);
-                router.push(`/log/${logId}`);
-              }
-            },
-            {
-              text: 'Apply Deload',
-              style: 'default',
-              onPress: async () => {
-                const logId = await startWorkout(activeProgram.id, day.id, day.exercises, true);
-                router.push(`/log/${logId}`);
-              }
-            }
-          ]
-        );
-      });
+      Alert.alert(
+        'Deload Recommended',
+        'Do you want to apply deload reductions (lower weight and sets) to this workout to give your joints, ligaments, and bones time to catch up?',
+        [
+          {
+            text: 'Normal Workout',
+            style: 'cancel',
+            onPress: () => doStartWorkout(day, false),
+          },
+          {
+            text: 'Apply Deload',
+            style: 'default',
+            onPress: () => doStartWorkout(day, true),
+          },
+        ]
+      );
     } else {
-      const logId = await startWorkout(activeProgram.id, day.id, day.exercises, false);
-      router.push(`/log/${logId}`);
+      doStartWorkout(day, false);
     }
   };
 

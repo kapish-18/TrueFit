@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, fontSize, fontWeight } from '../theme/theme';
+import { useSettingsStore } from '../stores/useSettingsStore';
 import SetRow from './SetRow';
 
 export default function ExerciseCard({
@@ -12,10 +13,12 @@ export default function ExerciseCard({
   safetyWarning,
   onUpdateSet,
   onAddSet,
+  onDeleteSet,
   onUpdateNotes,
   readOnly = false,
 }) {
   const [showNotes, setShowNotes] = useState(false);
+  const weightUnit = useSettingsStore(s => s.weightUnit);
 
   const getRecommendationColor = (type) => {
     switch (type) {
@@ -108,7 +111,7 @@ export default function ExerciseCard({
       <View style={styles.targetRow}>
         <Text style={styles.targetLabel}>Target</Text>
         <Text style={styles.targetValue}>
-          {exercise.target_weight > 0 ? `${exercise.target_weight}kg` : '—'} × {exercise.target_reps_min}–{exercise.target_reps_max} reps × {exercise.target_sets} sets
+          {exercise.target_weight > 0 ? `${exercise.target_weight}${weightUnit}` : '—'} × {exercise.target_reps_min}–{exercise.target_reps_max} reps × {exercise.target_sets} sets
         </Text>
       </View>
 
@@ -116,9 +119,9 @@ export default function ExerciseCard({
       <View style={styles.setsContainer}>
         <View style={styles.setsHeader}>
           <Text style={[styles.setHeaderText, { flex: 0.5 }]}>Set</Text>
-          <Text style={[styles.setHeaderText, { flex: 1 }]}>Weight (kg)</Text>
+          <Text style={[styles.setHeaderText, { flex: 1 }]}>Weight ({weightUnit})</Text>
           <Text style={[styles.setHeaderText, { flex: 1 }]}>Reps</Text>
-          <View style={{ width: 24 }} />
+          <View style={{ width: 28 }} />
         </View>
 
         {(exercise.sets || []).map((set, index) => (
@@ -129,11 +132,13 @@ export default function ExerciseCard({
             exerciseId={exercise.id}
             readOnly={readOnly}
             onUpdateSet={onUpdateSet}
+            onDeleteSet={onDeleteSet}
+            isLastSet={index === (exercise.sets || []).length - 1}
           />
         ))}
 
         {!readOnly && (
-          <Pressable style={styles.addSetBtn} onPress={() => onAddSet?.(exercise.id)}>
+          <Pressable style={styles.addSetBtn} onPress={() => onAddSet?.(exercise.id)} hitSlop={12}>
             <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
             <Text style={styles.addSetText}>Add Set</Text>
           </Pressable>

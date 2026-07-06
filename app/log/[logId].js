@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { colors, spacing, radius, fontSize, fontWeight } from '../../src/theme/theme';
 import { useWorkoutStore } from '../../src/stores/useWorkoutStore';
+import { useSettingsStore } from '../../src/stores/useSettingsStore';
 import { useUIStore } from '../../src/stores/useUIStore';
 import ExerciseCard from '../../src/components/ExerciseCard';
 import { getLastPerformance } from '../../src/db/dao';
@@ -17,10 +18,11 @@ export default function LogWorkout() {
   const { logId } = useLocalSearchParams();
   const router = useRouter();
   const showToast = useUIStore(s => s.showToast);
+  const weightUnit = useSettingsStore(s => s.weightUnit);
 
   const {
     currentLogId, currentDayId, currentLogDate, isDeload, exercises, bodyweight, overallNotes,
-    loadWorkout, updateSet, addSet, updateExerciseNotes,
+    loadWorkout, updateSet, addSet, deleteSet, updateExerciseNotes,
     setBodyweight, setOverallNotes, saveWorkout, deleteCurrentWorkout, clearSession,
     isSaving, newPRs,
   } = useWorkoutStore();
@@ -227,6 +229,7 @@ export default function LogWorkout() {
             safetyWarning={safetyWarnings[ex.exercise_id]}
             onUpdateSet={handleUpdateSet}
             onAddSet={addSet}
+            onDeleteSet={deleteSet}
             onUpdateNotes={updateExerciseNotes}
             readOnly={readOnly}
           />
@@ -236,7 +239,7 @@ export default function LogWorkout() {
         {!readOnly && (
           <View style={styles.extraSection}>
             <View style={styles.bodyweightRow}>
-              <Text style={styles.extraLabel}>Bodyweight (kg)</Text>
+              <Text style={styles.extraLabel}>Bodyweight ({weightUnit})</Text>
               <TextInput
                 style={styles.bodyweightInput}
                 keyboardType="numeric"

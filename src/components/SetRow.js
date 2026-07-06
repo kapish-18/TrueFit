@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, fontSize, fontWeight, spacing } from '../theme/theme';
 
-export default function SetRow({ set, index, exerciseId, readOnly, onUpdateSet }) {
+export default function SetRow({ set, index, exerciseId, readOnly, onUpdateSet, onDeleteSet, isLastSet }) {
   const [weight, setWeight] = useState(set.weight ? String(set.weight) : '');
   const [reps, setReps] = useState(set.reps ? String(set.reps) : '');
 
@@ -47,9 +47,22 @@ export default function SetRow({ set, index, exerciseId, readOnly, onUpdateSet }
           onUpdateSet?.(exerciseId, set.id, { reps: finalVal });
         }}
       />
-      <View style={{ width: 24, alignItems: 'center' }}>
-        {parseFloat(weight) > 0 && parseInt(reps) > 0 && (
-          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+      <View style={{ width: 28, alignItems: 'center' }}>
+        {!readOnly && onDeleteSet ? (
+          <Pressable
+            onPress={() => onDeleteSet(exerciseId, set.id)}
+            hitSlop={12}
+          >
+            <Ionicons
+              name={parseFloat(weight) > 0 && parseInt(reps) > 0 ? 'checkmark-circle' : 'close-circle-outline'}
+              size={18}
+              color={parseFloat(weight) > 0 && parseInt(reps) > 0 ? colors.success : colors.textDim}
+            />
+          </Pressable>
+        ) : (
+          parseFloat(weight) > 0 && parseInt(reps) > 0 && (
+            <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+          )
         )}
       </View>
     </View>

@@ -7,6 +7,8 @@ import { getToday } from '../utils/date';
 
 /**
  * Check for new PRs after a workout is logged
+ * Deduplicates by finding the BEST weight, e1RM, and reps per exercise first,
+ * then checking those single bests against existing records.
  * @param {Array} logExercises - Logged exercises with their sets
  * @returns {Array} Array of new PRs detected
  */
@@ -16,42 +18,53 @@ export async function detectPRs(logExercises) {
   for (const ex of logExercises) {
     if (!ex.sets || ex.sets.length === 0) continue;
 
-    // Check each set for potential PRs
-    for (const set of ex.sets) {
-      if (!set.weight || set.weight <= 0 || !set.reps || set.reps <= 0) continue;
+    const validSets = ex.sets.filter(s => s.weight > 0 && s.reps > 0);
+    if (validSets.length === 0) continue;
 
-      // Check weight PR (heaviest weight at any reps)
-      const weightPR = await checkWeightPR(ex.exercise_id, set.weight, set.reps);
-      if (weightPR) {
-        newPRs.push({
-          ...weightPR,
-          exerciseName: ex.exercise_name,
-        });
+    // Find the single best for each PR type across ALL sets
+    let bestWeight = { weight: 0, reps: 0 };
+    let bestE1RM = { weight: 0, reps: 0, e1rm: 0 };
+    let bestReps = { weight: 0, reps: 0 };
+
+    for (const set of validSets) {
+      // Heaviest weight lifted
+      if (set.weight > bestWeight.weight) {
+        bestWeight = { weight: set.weight, reps: set.reps };
       }
 
-      // Check estimated 1RM PR
-      const e1rmPR = await checkE1RMPR(ex.exercise_id, set.weight, set.reps);
-      if (e1rmPR) {
-        newPRs.push({
-          ...e1rmPR,
-          exerciseName: ex.exercise_name,
-        });
+      // Highest estimated 1RM
+      const e1rm = estimate1RM(set.weight, set.reps);
+      if (e1rm > bestE1RM.e1rm) {
+        bestE1RM = { weight: set.weight, reps: set.reps, e1rm };
+      }
+
+      // Most reps (at any weight)
+      if (set.reps > bestReps.reps) {
+        bestReps = { weight: set.weight, reps: set.reps };
       }
     }
 
-    // Check rep PR (most reps at a given weight)
-    const bestRepSet = ex.sets.reduce((best, s) => {
-      if ((s.reps || 0) > (best.reps || 0)) return s;
-      return best;
-    }, ex.sets[0]);
+    // Check weight PR (only the single heaviest set)
+    if (bestWeight.weight > 0) {
+      const weightPR = await checkWeightPR(ex.exercise_id, bestWeight.weight, bestWeight.reps);
+      if (weightPR) {
+        newPRs.push({ ...weightPR, exerciseName: ex.exercise_name });
+      }
+    }
 
-    if (bestRepSet?.reps > 0) {
-      const repPR = await checkRepPR(ex.exercise_id, bestRepSet.weight, bestRepSet.reps);
+    // Check estimated 1RM PR (only the single best e1RM)
+    if (bestE1RM.e1rm > 0) {
+      const e1rmPR = await checkE1RMPR(ex.exercise_id, bestE1RM.weight, bestE1RM.reps);
+      if (e1rmPR) {
+        newPRs.push({ ...e1rmPR, exerciseName: ex.exercise_name });
+      }
+    }
+
+    // Check rep PR (only the single best rep set)
+    if (bestReps.reps > 0) {
+      const repPR = await checkRepPR(ex.exercise_id, bestReps.weight, bestReps.reps);
       if (repPR) {
-        newPRs.push({
-          ...repPR,
-          exerciseName: ex.exercise_name,
-        });
+        newPRs.push({ ...repPR, exerciseName: ex.exercise_name });
       }
     }
   }
