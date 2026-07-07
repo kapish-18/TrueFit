@@ -151,17 +151,20 @@ export default function LogWorkout() {
 
     if (prs.length > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      for (const pr of prs) {
-        const prLabel = pr.type === 'weight' ? `${pr.value}kg` :
-                        pr.type === 'estimated_1rm' ? `e1RM: ${pr.value}kg` :
+      prs.forEach((pr, i) => {
+        const unit = weightUnit || 'kg';
+        const prLabel = pr.type === 'weight' ? `${pr.value}${unit}` :
+                        pr.type === 'estimated_1rm' ? `e1RM: ${pr.value}${unit}` :
                         `${pr.value} reps`;
-        showToast(`🏆 New PR! ${pr.exerciseName}: ${prLabel}`, 'pr', 4000);
-      }
+        setTimeout(() => {
+          showToast(`🏆 New PR! ${pr.exerciseName}: ${prLabel}`, 'pr', 4000);
+        }, i * 800);
+      });
     } else {
       showToast('Workout saved!', 'success');
     }
 
-    setTimeout(() => router.back(), 500);
+    setTimeout(() => router.back(), prs.length > 0 ? 1500 : 500);
   };
 
   const handleDiscard = () => {

@@ -66,7 +66,7 @@ export default function PlannerIndex() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>Workout Planner</Text>
       <Text style={styles.subtitle}>Create and manage your training programs</Text>
 
