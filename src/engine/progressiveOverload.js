@@ -103,8 +103,36 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
         confidence: 'medium',
       };
 
+    case 'below_weight': {
+      // Reps are solid but weight is below target → increase weight toward target
+      const nextWeight = Math.min(
+        recommendedWeight(avgWeight, defaultIncrement),
+        targetWeight
+      );
+      return {
+        type: 'increase_weight',
+        status: 'success',
+        message: `Good reps at ${avgWeight}kg! Increase weight to ${nextWeight}kg toward your ${targetWeight}kg target.`,
+        recommendedWeight: nextWeight,
+        recommendedRepsMin: targetRepsMin,
+        recommendedRepsMax: targetRepsMax,
+        recommendedSets: currentTarget.target_sets,
+        alternatives: [
+          {
+            type: 'maintain',
+            message: `Or stay at ${avgWeight}kg and push for ${targetRepsMax} reps first.`,
+            weight: avgWeight,
+            repsMin: targetRepsMin,
+            repsMax: targetRepsMax,
+          },
+        ],
+        lastPerformance: { weight: avgWeight, reps: avgReps },
+        confidence: 'high',
+      };
+    }
+
     case 'failed':
-    default:
+    default: {
       // Didn't meet minimum → consider reducing
       const reducedWeight = Math.round((avgWeight * 0.9) / defaultIncrement) * defaultIncrement;
       return {
@@ -126,6 +154,7 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
         lastPerformance: { weight: avgWeight, reps: avgReps },
         confidence: 'medium',
       };
+    }
   }
 }
 

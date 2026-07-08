@@ -74,6 +74,15 @@ export function evaluatePerformance(completedSets, targetRepsMin, targetRepsMax,
   if (allExceeded) return 'exceeded';
   if (allHitTarget) return 'met';
   if (someHit) return 'partial';
+
+  // NEW: Check if weight is below target but reps are good
+  // e.g. target 40kg×8-12, performed 37.5kg×11 — the user is progressing, not failing
+  const allRepsGood = validSets.every(s => s.reps >= targetRepsMin);
+  const avgWeight = validSets.reduce((sum, s) => sum + s.weight, 0) / validSets.length;
+  if (allRepsGood && avgWeight < targetWeight && avgWeight > 0) {
+    return 'below_weight';
+  }
+
   return 'failed';
 }
 
