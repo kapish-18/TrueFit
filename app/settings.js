@@ -1,6 +1,6 @@
 // Settings Screen
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert, Share } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert, Share, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, fontSize, fontWeight, shadows } from '../src/theme/theme';
 import { useSettingsStore } from '../src/stores/useSettingsStore';
@@ -207,15 +207,80 @@ export default function SettingsScreen() {
       <Text style={styles.sectionTitle}>About</Text>
       <View style={styles.section}>
         <SettingRow
-          icon="information-circle"
+          icon="fitness"
           title="TrueFit"
-          subtitle="Intelligent Workout Planner v1.0.0"
+          subtitle="Intelligent Workout Companion v1.0.0"
         />
         <SettingRow
           icon="code-slash"
-          iconColor={colors.purple}
-          title="Built with"
-          subtitle="React Native · Expo · SQLite · Zustand"
+          iconColor={colors.primary}
+          title="Built by Kapish"
+          subtitle="Solo-designed and developed"
+        />
+      </View>
+
+      {/* Support & Links */}
+      <Text style={styles.sectionTitle}>Support & Links</Text>
+      <View style={styles.section}>
+        <SettingRow
+          icon="logo-github"
+          title="Star on GitHub ⭐"
+          subtitle="If you like TrueFit, a star means a lot!"
+          onPress={() => Linking.openURL('https://github.com/kapish-18/TrueFit')}
+          right={
+            <Ionicons name="open-outline" size={18} color={colors.textDim} />
+          }
+        />
+
+        <Pressable
+          style={styles.donationBtn}
+          onPress={() => {
+            Alert.alert(
+              '🥤 Buy Me a Protein Shake',
+              'TrueFit is free and open source. If it helps your gains, consider fueling mine!\n\nThis will open your UPI payment app.',
+              [
+                { text: 'Maybe Later', style: 'cancel' },
+                {
+                  text: 'Send ₹49 🥤',
+                  onPress: () => Linking.openURL('upi://pay?pa=YOUR_UPI_ID@upi&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=49&cu=INR'),
+                },
+                {
+                  text: 'Send ₹99 💪',
+                  onPress: () => Linking.openURL('upi://pay?pa=YOUR_UPI_ID@upi&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=99&cu=INR'),
+                },
+              ]
+            );
+          }}
+        >
+          <View style={styles.donationContent}>
+            <Text style={styles.donationEmoji}>🥤</Text>
+            <View style={styles.donationText}>
+              <Text style={styles.donationTitle}>Buy Me a Protein Shake</Text>
+              <Text style={styles.donationSubtitle}>Free app, broke developer. Help fuel the gains!</Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <SettingRow
+          icon="shield-checkmark-outline"
+          iconColor={colors.success}
+          title="Privacy Policy"
+          subtitle="No data collected — fully offline"
+          onPress={() => Linking.openURL('https://kapish-18.github.io/TrueFit/privacy-policy.html')}
+          right={
+            <Ionicons name="open-outline" size={18} color={colors.textDim} />
+          }
+        />
+      </View>
+
+      {/* Legal */}
+      <Text style={styles.sectionTitle}>Legal</Text>
+      <View style={styles.section}>
+        <SettingRow
+          icon="document-text-outline"
+          iconColor={colors.textDim}
+          title="License"
+          subtitle="MIT License — Open Source"
         />
       </View>
 
@@ -306,5 +371,36 @@ const styles = StyleSheet.create({
   },
   toggleTextActive: {
     color: colors.textInverse,
+  },
+  donationBtn: {
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  donationContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 212, 255, 0.06)',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 255, 0.15)',
+    padding: spacing.lg,
+  },
+  donationEmoji: {
+    fontSize: 32,
+    marginRight: spacing.md,
+  },
+  donationText: {
+    flex: 1,
+  },
+  donationTitle: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: colors.primary,
+    marginBottom: 2,
+  },
+  donationSubtitle: {
+    fontSize: fontSize.xs,
+    color: colors.textDim,
   },
 });
