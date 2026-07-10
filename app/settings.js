@@ -242,11 +242,11 @@ export default function SettingsScreen() {
                 { text: 'Maybe Later', style: 'cancel' },
                 {
                   text: 'Send ₹49 🥤',
-                  onPress: () => Linking.openURL('upi://pay?pa=YOUR_UPI_ID@upi&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=49&cu=INR'),
+                  onPress: () => Linking.openURL('upi://pay?pa=8368587472@axl&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=49&cu=INR'),
                 },
                 {
                   text: 'Send ₹99 💪',
-                  onPress: () => Linking.openURL('upi://pay?pa=YOUR_UPI_ID@upi&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=99&cu=INR'),
+                  onPress: () => Linking.openURL('upi://pay?pa=8368587472@axl&pn=Kapish&tn=TrueFit%20Protein%20Shake&am=99&cu=INR'),
                 },
               ]
             );
