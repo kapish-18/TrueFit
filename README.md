@@ -4,7 +4,7 @@
 
 # TrueFit
 
-### AI-powered strength training companion — progressive overload, fatigue management, and personal records, all offline.
+### Intelligent and algorithmic strength training companion — progressive overload, fatigue management, and personal records, all offline.
 
 [![Made with React Native](https://img.shields.io/badge/React%20Native-Expo%20SDK%2056-20232A?style=flat&logo=react)](https://expo.dev)
 [![Database](https://img.shields.io/badge/Database-SQLite-003B57?style=flat&logo=sqlite)](https://docs.expo.dev/versions/latest/sdk/sqlite/)
