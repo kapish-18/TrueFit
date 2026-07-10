@@ -349,7 +349,7 @@ cd android
 
 **Kapish** — B.Tech CSE, VIT University
 
-Solo-designed and built. Every algorithm, every screen, every database query.
+Solo-designed and built.
 
 ---
 
