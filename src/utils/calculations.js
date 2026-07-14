@@ -58,7 +58,7 @@ export function recommendedWeight(currentWeight, defaultIncrement = 2.5) {
 export function evaluatePerformance(completedSets, targetRepsMin, targetRepsMax, targetWeight) {
   if (!completedSets || completedSets.length === 0) return 'failed';
 
-  const validSets = completedSets.filter(s => s.weight > 0 && s.reps > 0);
+  const validSets = completedSets.filter(s => s.weight >= 0 && s.reps > 0);
   if (validSets.length === 0) return 'failed';
 
   const allHitTarget = validSets.every(
@@ -79,7 +79,7 @@ export function evaluatePerformance(completedSets, targetRepsMin, targetRepsMax,
   // e.g. target 40kg×8-12, performed 37.5kg×11 — the user is progressing, not failing
   const allRepsGood = validSets.every(s => s.reps >= targetRepsMin);
   const avgWeight = validSets.reduce((sum, s) => sum + s.weight, 0) / validSets.length;
-  if (allRepsGood && avgWeight < targetWeight && avgWeight > 0) {
+  if (allRepsGood && avgWeight < targetWeight) {
     return 'below_weight';
   }
 

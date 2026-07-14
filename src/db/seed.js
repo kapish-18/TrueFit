@@ -29,6 +29,8 @@ export const EXERCISE_SEED = [
   { id: 'chest-supported-row', name: 'Chest Supported Row', muscle_group: 'back', secondary_muscles: ['biceps'], category: 'compound', equipment: 'dumbbell', default_increment: 2.0 },
   { id: 'meadows-row', name: 'Meadows Row', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'barbell', default_increment: 2.5 },
   { id: 'straight-arm-pulldown', name: 'Straight Arm Pulldown', muscle_group: 'back', secondary_muscles: [], category: 'isolation', equipment: 'cable', default_increment: 2.5 },
+  { id: 'single-arm-db-row', name: 'Single Arm Dumbbell Row', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'dumbbell', default_increment: 2.0 },
+  { id: 'hyperextension', name: 'Hyperextension', muscle_group: 'back', secondary_muscles: ['glutes', 'hamstrings'], category: 'compound', equipment: 'bodyweight', default_increment: 0 },
 
   // === SHOULDERS ===
   { id: 'overhead-press', name: 'Overhead Press', muscle_group: 'shoulders', secondary_muscles: ['triceps'], category: 'compound', equipment: 'barbell', default_increment: 2.5 },
@@ -53,6 +55,7 @@ export const EXERCISE_SEED = [
   { id: 'goblet-squat', name: 'Goblet Squat', muscle_group: 'quadriceps', secondary_muscles: ['glutes', 'core'], category: 'compound', equipment: 'dumbbell', default_increment: 2.0 },
   { id: 'walking-lunge', name: 'Walking Lunge', muscle_group: 'quadriceps', secondary_muscles: ['glutes', 'hamstrings'], category: 'compound', equipment: 'dumbbell', default_increment: 2.0 },
   { id: 'sissy-squat', name: 'Sissy Squat', muscle_group: 'quadriceps', secondary_muscles: [], category: 'isolation', equipment: 'bodyweight', default_increment: 0 },
+  { id: 'lever-squat', name: 'Lever Squat Machine', muscle_group: 'quadriceps', secondary_muscles: ['glutes', 'hamstrings'], category: 'compound', equipment: 'machine', default_increment: 5.0 },
 
   // === HAMSTRINGS ===
   { id: 'romanian-deadlift', name: 'Romanian Deadlift', muscle_group: 'hamstrings', secondary_muscles: ['glutes', 'back'], category: 'compound', equipment: 'barbell', default_increment: 2.5 },
@@ -73,7 +76,7 @@ export const EXERCISE_SEED = [
   { id: 'ez-bar-curl', name: 'EZ Bar Curl', muscle_group: 'biceps', secondary_muscles: ['forearms'], category: 'isolation', equipment: 'ez-bar', default_increment: 2.5 },
   { id: 'dumbbell-curl', name: 'Dumbbell Curl', muscle_group: 'biceps', secondary_muscles: ['forearms'], category: 'isolation', equipment: 'dumbbell', default_increment: 1.0 },
   { id: 'hammer-curl', name: 'Hammer Curl', muscle_group: 'biceps', secondary_muscles: ['forearms'], category: 'isolation', equipment: 'dumbbell', default_increment: 1.0 },
-  { id: 'incline-db-curl', name: 'Incline Dumbbell Curl', muscle_group: 'biceps', secondary_muscles: [], category: 'isolation', equipment: 'dumbbell', default_increment: 1.0 },
+  { id: 'incline-db-curl', name: 'Incline Dumbbell Bicep Curl', muscle_group: 'biceps', secondary_muscles: [], category: 'isolation', equipment: 'dumbbell', default_increment: 1.0 },
   { id: 'cable-curl', name: 'Cable Curl', muscle_group: 'biceps', secondary_muscles: ['forearms'], category: 'isolation', equipment: 'cable', default_increment: 2.5 },
   { id: 'bayesian-curl', name: 'Bayesian Cable Curl', muscle_group: 'biceps', secondary_muscles: [], category: 'isolation', equipment: 'cable', default_increment: 1.0 },
   { id: 'preacher-curl', name: 'Preacher Curl', muscle_group: 'biceps', secondary_muscles: [], category: 'isolation', equipment: 'ez-bar', default_increment: 2.5 },

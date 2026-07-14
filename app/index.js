@@ -129,7 +129,7 @@ export default function DashboardScreen() {
 
   if (!activeProgram) {
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
           <Text style={styles.greeting}>TrueFit</Text>
           <Text style={styles.date}>{formatDateReadable(getToday())}</Text>
@@ -141,7 +141,7 @@ export default function DashboardScreen() {
           actionLabel="Create Program"
           onAction={() => router.push('/planner')}
         />
-      </View>
+      </ScrollView>
     );
   }
 

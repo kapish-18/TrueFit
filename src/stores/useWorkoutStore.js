@@ -72,8 +72,8 @@ export const useWorkoutStore = create((set, get) => ({
             target_weight: ex.target_weight,
           }, ex.default_increment || 2.5);
 
-          // Permanently save the recommended weight into the database so the UI stops showing "-"
-          ex.target_weight = rec.recommendedWeight > 0 ? rec.recommendedWeight : maxGhostWeight;
+          // Save the recommended weight so the UI stops showing "-"
+          ex.target_weight = rec.recommendedWeight >= 0 ? rec.recommendedWeight : maxGhostWeight;
           if (rec.recommendedSets) ex.target_sets = rec.recommendedSets;
           
           prefillWeight = ex.target_weight;

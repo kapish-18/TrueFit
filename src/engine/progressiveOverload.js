@@ -27,10 +27,10 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
   const targetRepsMin = lastPerformance.target_reps_min || currentTarget.target_reps_min || 6;
   const targetRepsMax = lastPerformance.target_reps_max || currentTarget.target_reps_max || 12;
 
-  // Bug #9: When target_weight is 0 (template default), use the average weight from last session
-  // as the implicit target, so evaluatePerformance gives realistic results
+  // Bug #9: When target_weight is null/undefined (not 0), use the average weight from last session
+  // as the implicit target. 0 is a valid target for bodyweight exercises.
   const avgWeightFromSets = Math.round(sets.reduce((sum, s) => sum + (s.weight || 0), 0) / sets.length * 10) / 10;
-  const targetWeight = lastPerformance.target_weight || currentTarget.target_weight || avgWeightFromSets;
+  const targetWeight = lastPerformance.target_weight ?? currentTarget.target_weight ?? avgWeightFromSets;
 
   const performance = evaluatePerformance(sets, targetRepsMin, targetRepsMax, targetWeight);
 

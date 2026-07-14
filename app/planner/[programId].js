@@ -29,8 +29,10 @@ export default function EditProgram() {
   const [editingName, setEditingName] = useState(false);
   const [programName, setProgramName] = useState('');
   const [expandedDay, setExpandedDay] = useState(null);
+  const hasInitialExpand = React.useRef(false);
 
   useEffect(() => {
+    hasInitialExpand.current = false;
     loadData();
   }, [programId]);
 
@@ -45,8 +47,9 @@ export default function EditProgram() {
     }
     setDays(daysData);
 
-    if (daysData.length > 0 && !expandedDay) {
+    if (daysData.length > 0 && !hasInitialExpand.current) {
       setExpandedDay(daysData[0].id);
+      hasInitialExpand.current = true;
     }
   }, [programId, programs]);
 

@@ -42,7 +42,7 @@ export default function ExerciseCard({
     }
   };
 
-  const isCompleted = exercise.sets?.length > 0 && exercise.sets.every(s => s.weight > 0 && s.reps > 0);
+  const isCompleted = exercise.sets?.length > 0 && exercise.sets.every(s => s.weight >= 0 && s.reps > 0);
 
   return (
     <View style={[styles.card, isCompleted && styles.cardCompleted]}>

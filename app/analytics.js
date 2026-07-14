@@ -81,20 +81,23 @@ export default function AnalyticsScreen() {
   };
 
   // Chart data transforms
-  const volumeChartData = data.volumeTrend.map((v, i) => ({
-    value: Math.round(v.totalVolume / 1000),
-    label: `W${i + 1}`,
-    frontColor: colors.primary,
-    gradientColor: colors.primaryDim,
-    topLabelComponent: () => (
-      <Text style={{ fontSize: 9, color: colors.textDim }}>{Math.round(v.totalVolume / 1000)}k</Text>
-    ),
-  }));
+  const volumeChartData = data.volumeTrend.map((v, i) => {
+    const value = Math.round(v.totalVolume / 1000);
+    return {
+      value: value || 0.5, // minimum bar height so 0-volume weeks are visible
+      label: `W${i + 1}`,
+      frontColor: value > 0 ? colors.primary : colors.border,
+      gradientColor: colors.primaryDim,
+      topLabelComponent: value > 0 ? () => (
+        <Text style={{ fontSize: 9, color: colors.textDim }}>{value}k</Text>
+      ) : undefined,
+    };
+  });
 
   const workoutFrequencyData = data.weeklyWorkouts.map((w, i) => ({
-    value: w.count,
+    value: w.count || 0.3, // minimum bar height for 0-workout weeks
     label: `W${i + 1}`,
-    frontColor: w.count >= 3 ? colors.success : w.count >= 1 ? colors.warning : colors.danger,
+    frontColor: w.count >= 3 ? colors.success : w.count >= 1 ? colors.warning : colors.border,
   }));
 
   const hasData = data.volumeTrend.some(v => v.totalVolume > 0);
@@ -143,6 +146,8 @@ export default function AnalyticsScreen() {
                 height={160}
                 barWidth={Math.min(24, CHART_WIDTH / (volumeChartData.length * 2))}
                 spacing={Math.min(16, CHART_WIDTH / (volumeChartData.length * 3))}
+                initialSpacing={10}
+                endSpacing={10}
                 noOfSections={4}
                 barBorderRadius={4}
                 yAxisColor={colors.border}
@@ -168,6 +173,8 @@ export default function AnalyticsScreen() {
                 height={120}
                 barWidth={Math.min(24, CHART_WIDTH / (workoutFrequencyData.length * 2))}
                 spacing={Math.min(16, CHART_WIDTH / (workoutFrequencyData.length * 3))}
+                initialSpacing={10}
+                endSpacing={10}
                 noOfSections={3}
                 maxValue={7}
                 barBorderRadius={4}

@@ -178,13 +178,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterPill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md + 2,
+    paddingVertical: spacing.xs + 2,
     borderRadius: radius.full,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    marginRight: spacing.sm,
   },
   filterPillActive: {
     backgroundColor: colors.primaryBg,
@@ -194,6 +193,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     fontWeight: fontWeight.medium,
+    flexShrink: 0,
   },
   filterPillTextActive: {
     color: colors.primary,
