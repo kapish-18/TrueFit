@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TrueFit",
-    "slug": "TrueFit",
+    "slug": "truefit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,6 +24,12 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "27c72b2d-4012-42ea-a5bd-db9874d3631c"
+      }
     }
   }
 }
