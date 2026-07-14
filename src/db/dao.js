@@ -430,7 +430,7 @@ export async function getLastPerformance(exerciseId, excludeLogId = null, dayId 
   }
 
   if (beforeDate) {
-    query += ` AND wl.date < ?`;
+    query += ` AND wl.date <= ?`;
     params.push(beforeDate);
   }
 
@@ -452,7 +452,7 @@ export async function getLastPerformance(exerciseId, excludeLogId = null, dayId 
       fallbackParams.push(excludeLogId);
     }
     if (beforeDate) {
-      fallbackQuery += ` AND wl.date < ?`;
+      fallbackQuery += ` AND wl.date <= ?`;
       fallbackParams.push(beforeDate);
     }
     fallbackQuery += ` ORDER BY wl.date DESC LIMIT 1`;

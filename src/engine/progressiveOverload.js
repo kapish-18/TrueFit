@@ -45,47 +45,32 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
   const avgReps = Math.round(sets.reduce((sum, s) => sum + (s.reps || 0), 0) / sets.length);
   const avgWeight = Math.round(sets.reduce((sum, s) => sum + (s.weight || 0), 0) / sets.length * 10) / 10;
 
+  // Check if ALL sets hit max reps (needed for weight increase decision)
+  const allSetsMaxed = sets.every(s => (s.reps || 0) >= targetRepsMax);
+
   switch (performance) {
     case 'exceeded':
-      // All sets hit max reps → increase weight
+      // All sets hit max reps at target weight → increase weight
       return {
         type: 'increase_weight',
-        message: `All sets exceeded target. Increase weight by ${defaultIncrement}kg.`,
+        message: `All sets hit ${targetRepsMax} reps. Increase weight by ${defaultIncrement}kg.`,
         recommendedWeight: recommendedWeight(avgWeight, defaultIncrement),
         recommendedRepsMin: targetRepsMin,
         recommendedRepsMax: targetRepsMax,
         recommendedSets: currentTarget.target_sets,
-        alternatives: [
-          {
-            type: 'increase_reps',
-            message: `Or keep ${avgWeight}kg and aim for ${targetRepsMax + 1}-${targetRepsMax + 2} reps.`,
-            weight: avgWeight,
-            repsMin: targetRepsMax + 1,
-            repsMax: targetRepsMax + 2,
-          },
-        ],
         lastPerformance: { weight: avgWeight, reps: avgReps },
         confidence: 'high',
       };
 
     case 'met':
-      // All sets hit minimum reps → try to increase reps first
+      // All sets hit min reps but NOT max → aim for more reps
       return {
         type: 'increase_reps',
-        message: `Target met. Aim for more reps at ${avgWeight}kg.`,
+        message: `Good work! Aim for ${targetRepsMax} reps at ${avgWeight}kg before increasing weight.`,
         recommendedWeight: avgWeight,
         recommendedRepsMin: Math.min(avgReps + 1, targetRepsMax),
         recommendedRepsMax: targetRepsMax,
         recommendedSets: currentTarget.target_sets,
-        alternatives: [
-          {
-            type: 'increase_weight',
-            message: `Or increase to ${recommendedWeight(avgWeight, defaultIncrement)}kg at ${targetRepsMin} reps.`,
-            weight: recommendedWeight(avgWeight, defaultIncrement),
-            repsMin: targetRepsMin,
-            repsMax: targetRepsMax,
-          },
-        ],
         lastPerformance: { weight: avgWeight, reps: avgReps },
         confidence: 'high',
       };
@@ -104,56 +89,77 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
       };
 
     case 'below_weight': {
-      // Reps are solid but weight is below target → increase weight toward target
-      const nextWeight = Math.min(
-        recommendedWeight(avgWeight, defaultIncrement),
-        targetWeight
-      );
-      return {
-        type: 'increase_weight',
-        status: 'success',
-        message: `Good reps at ${avgWeight}kg! Increase weight to ${nextWeight}kg toward your ${targetWeight}kg target.`,
-        recommendedWeight: nextWeight,
-        recommendedRepsMin: targetRepsMin,
-        recommendedRepsMax: targetRepsMax,
-        recommendedSets: currentTarget.target_sets,
-        alternatives: [
-          {
-            type: 'maintain',
-            message: `Or stay at ${avgWeight}kg and push for ${targetRepsMax} reps first.`,
-            weight: avgWeight,
-            repsMin: targetRepsMin,
-            repsMax: targetRepsMax,
-          },
-        ],
-        lastPerformance: { weight: avgWeight, reps: avgReps },
-        confidence: 'high',
-      };
+      // Weight is below target but reps are solid
+      if (allSetsMaxed) {
+        // All sets hit max reps → OK to increase weight toward target
+        const nextWeight = Math.min(
+          recommendedWeight(avgWeight, defaultIncrement),
+          targetWeight
+        );
+        return {
+          type: 'increase_weight',
+          message: `All sets hit ${targetRepsMax} reps at ${avgWeight}kg! Increase to ${nextWeight}kg.`,
+          recommendedWeight: nextWeight,
+          recommendedRepsMin: targetRepsMin,
+          recommendedRepsMax: targetRepsMax,
+          recommendedSets: currentTarget.target_sets,
+          lastPerformance: { weight: avgWeight, reps: avgReps },
+          confidence: 'high',
+        };
+      } else {
+        // Reps haven't maxed out yet → push for more reps first
+        return {
+          type: 'increase_reps',
+          message: `Aim for ${targetRepsMax} reps at ${avgWeight}kg before increasing weight.`,
+          recommendedWeight: avgWeight,
+          recommendedRepsMin: Math.min(avgReps + 1, targetRepsMax),
+          recommendedRepsMax: targetRepsMax,
+          recommendedSets: currentTarget.target_sets,
+          lastPerformance: { weight: avgWeight, reps: avgReps },
+          confidence: 'high',
+        };
+      }
     }
 
     case 'failed':
     default: {
-      // Didn't meet minimum → consider reducing
+      // Didn't meet minimum → consider reducing (but not to the same weight)
       const reducedWeight = Math.round((avgWeight * 0.9) / defaultIncrement) * defaultIncrement;
-      return {
-        type: 'reduce',
-        message: `Target not reached. Consider reducing to ${reducedWeight}kg.`,
-        recommendedWeight: Math.max(reducedWeight, 0),
-        recommendedRepsMin: targetRepsMin,
-        recommendedRepsMax: targetRepsMax,
-        recommendedSets: currentTarget.target_sets,
-        alternatives: [
-          {
-            type: 'maintain',
-            message: `Or keep ${avgWeight}kg and focus on form.`,
-            weight: avgWeight,
-            repsMin: targetRepsMin,
-            repsMax: targetRepsMax,
-          },
-        ],
-        lastPerformance: { weight: avgWeight, reps: avgReps },
-        confidence: 'medium',
-      };
+      const shouldReduce = reducedWeight < avgWeight && avgWeight > 0;
+
+      if (shouldReduce) {
+        return {
+          type: 'reduce',
+          message: `Target not reached. Consider reducing to ${reducedWeight}kg.`,
+          recommendedWeight: Math.max(reducedWeight, 0),
+          recommendedRepsMin: targetRepsMin,
+          recommendedRepsMax: targetRepsMax,
+          recommendedSets: currentTarget.target_sets,
+          alternatives: [
+            {
+              type: 'maintain',
+              message: `Or keep ${avgWeight}kg and focus on form.`,
+              weight: avgWeight,
+              repsMin: targetRepsMin,
+              repsMax: targetRepsMax,
+            },
+          ],
+          lastPerformance: { weight: avgWeight, reps: avgReps },
+          confidence: 'medium',
+        };
+      } else {
+        // Weight is already low or 0 — just maintain and focus on form/reps
+        return {
+          type: 'maintain',
+          message: `Keep at ${avgWeight}kg and focus on hitting ${targetRepsMin}+ reps with good form.`,
+          recommendedWeight: avgWeight,
+          recommendedRepsMin: targetRepsMin,
+          recommendedRepsMax: targetRepsMax,
+          recommendedSets: currentTarget.target_sets,
+          lastPerformance: { weight: avgWeight, reps: avgReps },
+          confidence: 'medium',
+        };
+      }
     }
   }
 }
