@@ -9,7 +9,8 @@
     "scheme": "truefit",
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "@react-native-community/datetimepicker"
     ],
     "ios": {
       "supportsTablet": true

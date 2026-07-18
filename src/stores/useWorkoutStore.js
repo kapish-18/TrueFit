@@ -24,11 +24,11 @@ export const useWorkoutStore = create((set, get) => ({
   /**
    * Start a new workout log from a program day
    */
-  startWorkout: async (programId, dayId, dayExercises, isDeload = false) => {
+  startWorkout: async (programId, dayId, dayExercises, isDeload = false, logDate = getToday()) => {
     const logId = await createWorkoutLog({
       program_id: programId,
       day_id: dayId,
-      date: getToday(),
+      date: logDate,
       overall_notes: isDeload ? '[DELOAD]' : '',
     });
 

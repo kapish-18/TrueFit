@@ -1,5 +1,6 @@
 // Log Index — Select which workout to log or view log history
 import React, { useState, useEffect, useCallback } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -19,7 +20,8 @@ export default function LogIndex() {
   const [refreshing, setRefreshing] = useState(false);
   const [deloadInfo, setDeloadInfo] = useState(null);
   const [starting, setStarting] = useState(false);
-
+  const [logDate, setLogDate] = useState(getToday());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   useFocusEffect(
     useCallback(() => {
       loadRecentLogs();
@@ -56,7 +58,7 @@ export default function LogIndex() {
   const doStartWorkout = async (day, isDeload) => {
     setStarting(true);
     try {
-      const logId = await startWorkout(activeProgram.id, day.id, day.exercises, isDeload);
+      const logId = await startWorkout(activeProgram.id, day.id, day.exercises, isDeload, logDate);
       router.push(`/log/${logId}`);
     } finally {
       setStarting(false);
@@ -111,8 +113,33 @@ export default function LogIndex() {
       keyboardShouldPersistTaps="handled"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
-      <Text style={styles.title}>Workout Log</Text>
-      <Text style={styles.subtitle}>{formatDateReadable(getToday())}</Text>
+      <View style={styles.headerTitleRow}>
+        <View>
+          <Text style={styles.title}>Workout Log</Text>
+          <Text style={styles.subtitle}>{formatDateReadable(logDate)}</Text>
+        </View>
+        <Pressable 
+          style={styles.dateBtn} 
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+        </Pressable>
+      </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(logDate)}
+          mode="date"
+          display="default"
+          maximumDate={new Date()} // Don't allow future logging
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setLogDate(selectedDate.toISOString().split('T')[0]);
+            }
+          }}
+        />
+      )}
 
       {/* Log a Workout */}
       <Text style={styles.sectionTitle}>Log a Workout</Text>
@@ -201,6 +228,23 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     marginBottom: spacing.xxl,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  dateBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.round,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+    ...shadows.sm,
   },
   sectionTitle: {
     fontSize: fontSize.lg,

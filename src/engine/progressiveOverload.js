@@ -50,10 +50,15 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
 
   switch (performance) {
     case 'exceeded':
-      // All sets hit max reps at target weight → increase weight
+      // All sets hit max reps at target weight → increase weight (or decrease assistance)
+      const actionTypeEx = defaultIncrement < 0 ? 'decrease_assistance' : 'increase_weight';
+      const msgEx = defaultIncrement < 0 
+        ? `All sets hit ${targetRepsMax} reps. Decrease assistance by ${Math.abs(defaultIncrement)}kg.`
+        : `All sets hit ${targetRepsMax} reps. Increase weight by ${defaultIncrement}kg.`;
+
       return {
-        type: 'increase_weight',
-        message: `All sets hit ${targetRepsMax} reps. Increase weight by ${defaultIncrement}kg.`,
+        type: actionTypeEx,
+        message: msgEx,
         recommendedWeight: recommendedWeight(avgWeight, defaultIncrement),
         recommendedRepsMin: targetRepsMin,
         recommendedRepsMax: targetRepsMax,
@@ -91,14 +96,20 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
     case 'below_weight': {
       // Weight is below target but reps are solid
       if (allSetsMaxed) {
-        // All sets hit max reps → OK to increase weight toward target
-        const nextWeight = Math.min(
-          recommendedWeight(avgWeight, defaultIncrement),
-          targetWeight
-        );
+        // All sets hit max reps → OK to move weight toward target
+        // For negative increments, "target" is lower, so we use Math.max to not overshoot
+        const nextWeight = defaultIncrement < 0 
+          ? Math.max(recommendedWeight(avgWeight, defaultIncrement), targetWeight)
+          : Math.min(recommendedWeight(avgWeight, defaultIncrement), targetWeight);
+          
+        const actionTypeBelow = defaultIncrement < 0 ? 'decrease_assistance' : 'increase_weight';
+        const msgBelow = defaultIncrement < 0
+          ? `All sets hit ${targetRepsMax} reps at ${avgWeight}kg! Decrease assistance to ${nextWeight}kg.`
+          : `All sets hit ${targetRepsMax} reps at ${avgWeight}kg! Increase to ${nextWeight}kg.`;
+
         return {
-          type: 'increase_weight',
-          message: `All sets hit ${targetRepsMax} reps at ${avgWeight}kg! Increase to ${nextWeight}kg.`,
+          type: actionTypeBelow,
+          message: msgBelow,
           recommendedWeight: nextWeight,
           recommendedRepsMin: targetRepsMin,
           recommendedRepsMax: targetRepsMax,
@@ -123,14 +134,29 @@ export function getOverloadRecommendation(lastPerformance, currentTarget, defaul
 
     case 'failed':
     default: {
-      // Didn't meet minimum → consider reducing (but not to the same weight)
-      const reducedWeight = Math.round((avgWeight * 0.9) / defaultIncrement) * defaultIncrement;
-      const shouldReduce = reducedWeight < avgWeight && avgWeight > 0;
+      // Didn't meet minimum → consider reducing intensity
+      let reducedWeight;
+      let shouldReduce = false;
+      let actionTypeFail = 'reduce';
+      let msgFail = '';
+
+      if (defaultIncrement < 0) {
+        // Assisted exercise: Failing means they need MORE assistance (higher weight)
+        reducedWeight = Math.round((avgWeight * 1.1) / Math.abs(defaultIncrement)) * Math.abs(defaultIncrement);
+        shouldReduce = true; // Always suggest more assistance if they failed
+        actionTypeFail = 'increase_assistance';
+        msgFail = `Target not reached. Consider increasing assistance to ${reducedWeight}kg.`;
+      } else {
+        // Normal exercise: Failing means they need LESS weight
+        reducedWeight = Math.round((avgWeight * 0.9) / defaultIncrement) * defaultIncrement;
+        shouldReduce = reducedWeight < avgWeight && avgWeight > 0;
+        msgFail = `Target not reached. Consider reducing to ${reducedWeight}kg.`;
+      }
 
       if (shouldReduce) {
         return {
-          type: 'reduce',
-          message: `Target not reached. Consider reducing to ${reducedWeight}kg.`,
+          type: actionTypeFail,
+          message: msgFail,
           recommendedWeight: Math.max(reducedWeight, 0),
           recommendedRepsMin: targetRepsMin,
           recommendedRepsMax: targetRepsMax,

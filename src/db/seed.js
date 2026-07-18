@@ -19,6 +19,7 @@ export const EXERCISE_SEED = [
   { id: 'barbell-row', name: 'Barbell Row', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'barbell', default_increment: 2.5 },
   { id: 'deadlift', name: 'Deadlift', muscle_group: 'back', secondary_muscles: ['hamstrings', 'glutes', 'traps', 'forearms'], category: 'compound', equipment: 'barbell', default_increment: 5.0 },
   { id: 'pull-up', name: 'Pull-Up', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'bodyweight', default_increment: 2.5 },
+  { id: 'assisted-pull-up', name: 'Assisted Pull-Up', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'machine', default_increment: -2.5 },
   { id: 'chin-up', name: 'Chin-Up', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'bodyweight', default_increment: 2.5 },
   { id: 'lat-pulldown', name: 'Lat Pulldown', muscle_group: 'back', secondary_muscles: ['biceps'], category: 'compound', equipment: 'cable', default_increment: 2.5 },
   { id: 'seated-cable-row', name: 'Seated Cable Row', muscle_group: 'back', secondary_muscles: ['biceps', 'forearms'], category: 'compound', equipment: 'cable', default_increment: 2.5 },
