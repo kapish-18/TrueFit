@@ -1,0 +1,13 @@
+# Generated native folders (EAS builds its own)
+/android
+/ios
+
+# Build outputs
+*.apk
+*.aab
+
+# Dev artifacts
+.expo
+.git
+docs/
+*.md
