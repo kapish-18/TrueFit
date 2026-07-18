@@ -14,6 +14,10 @@
 
 **84** exercises · **8** training engines · **100%** offline · **0** subscriptions
 
+<br/>
+
+[![Download APK](https://img.shields.io/badge/Download_APK-latest_release-00d4ff?style=for-the-badge&logo=android&logoColor=black)](https://github.com/kapish-18/TrueFit/releases/latest)
+
 </div>
 
 ---
