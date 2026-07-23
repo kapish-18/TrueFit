@@ -1,0 +1,86 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏗 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 🔧 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🔨 Build APK with EAS
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: ⏳ Wait for build and download APK
+        id: download
+        run: |
+          echo "Waiting for EAS build to complete..."
+          BUILD_URL=$(eas build:list --platform android --status finished --limit 1 --non-interactive --json | jq -r '.[0].artifacts.buildUrl')
+          
+          # Poll until we get a URL (EAS build can take a few minutes)
+          for i in $(seq 1 30); do
+            BUILD_URL=$(eas build:list --platform android --status finished --limit 1 --non-interactive --json | jq -r '.[0].artifacts.buildUrl')
+            if [ "$BUILD_URL" != "null" ] && [ -n "$BUILD_URL" ]; then
+              echo "Build complete! Downloading from: $BUILD_URL"
+              wget -q -O TrueFit.apk "$BUILD_URL"
+              echo "apk_path=TrueFit.apk" >> $GITHUB_OUTPUT
+              break
+            fi
+            echo "Build still in progress... (attempt $i/30)"
+            sleep 60
+          done
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 🏷 Get version from app.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./app.json').expo.version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION-$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: TrueFit ${{ steps.version.outputs.version }}
+          body: |
+            ## TrueFit ${{ steps.version.outputs.version }}
+
+            **Automatically built and released from the latest commit on `main`.**
+
+            ### Install
+            1. Download `TrueFit.apk` below
+            2. On your Android phone, open the file and tap Install
+            3. Enable "Install from unknown sources" if prompted
+
+            ---
+            **Commit:** ${{ github.sha }}
+            **Built:** ${{ github.run_id }}
+          files: TrueFit.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
